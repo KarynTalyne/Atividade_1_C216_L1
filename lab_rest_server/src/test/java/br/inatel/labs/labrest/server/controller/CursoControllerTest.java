@@ -38,12 +38,14 @@ class CursoControllerTest {
 	}
 	
 	@Test
-	void dadoCurso_quandoPostCurso_entaoRespondeComCursoCriado() {
-		Curso curso = new Curso(0L,"Manipulando arquivos json", 80);
-	
+	void dadoNovoCurso_quandoPostCurso_entaoRespondeComStatusCreatedCursoValido() {
+		Curso novocurso = new Curso();
+		novocurso.setDescricao("Manipulando arquivos json");
+		novocurso.setCargaHoraria(80);
+		
 		Curso cursoCriado = webTestClient.post()
-				.uri("/curso/")
-				.bodyValue(curso)
+				.uri("/curso")
+				.bodyValue(novocurso)
 				.exchange().expectStatus().isCreated().expectBody(Curso.class)
 				.returnResult().getResponseBody();
 		
@@ -55,51 +57,34 @@ class CursoControllerTest {
 	}
 	
 	@Test
-	void dadoCursoInfo_quandoPutCursoInfo_entaoRespondeComStatusAccepted( ) {
+	void dadoCursoExistente_quandoPutCurso_entaoRespondeComStatusAccepted( ) {
 		
-        Curso curso_antes = webTestClient.get().uri("/curso/"+2L).exchange().expectStatus().isOk().expectBody(Curso.class)
-				.returnResult().getResponseBody();
-        
-		Curso curso_para_atualizar = new Curso(2L, "Programação Java 11 em 2022", 40);
+		Curso cursoExistente = new Curso();
+		cursoExistente.setId(2L);
+		cursoExistente.setDescricao("Programação Java 11 em 2022");
+		cursoExistente.setCargaHoraria(40);
+		
 		
 		webTestClient.put()
-		.uri("/curso/")
-		.bodyValue(curso_para_atualizar)
-		.exchange().expectStatus().isAccepted().expectBody(Curso.class)
-		.returnResult();
+		.uri("/curso")
+		.bodyValue(cursoExistente)
+		.exchange().expectStatus().isAccepted().expectBody().isEmpty();
 		
-		Curso curso_depois = webTestClient.get().uri("/curso/"+2L).exchange().expectStatus().isOk().expectBody(Curso.class)
-				.returnResult().getResponseBody();
-		
-		assertEquals(curso_antes.getId(), 2L);
-		assertEquals(curso_antes.getDescricao(), "Programação Java 11");
-		assertEquals(curso_antes.getCargaHoraria(), 80);
-		
-		assertEquals(curso_depois.getId(), 2L);
-		assertEquals(curso_depois.getDescricao(), "Programação Java 11 em 2022");
-		assertEquals(curso_depois.getCargaHoraria(), 40);
 	}
 	
 	@Test
-	void dadoCursoIdvalido_quadoDeleteCursoPeloId_entaoRespondeComStatusNoContent() {
-		webTestClient.delete().uri("/curso/3").exchange().expectStatus().isNoContent();
-		webTestClient.get().uri("/curso/"+ 3L).exchange().expectStatus().isNotFound();
+	void dadoCursoIdvalido_quadoDeleteCursoPeloId_entaoRespondeComStatusNoContentECorpoVazio() {
+		Long cursoIdValido = 3L;
+		webTestClient.delete().uri("/curso/"+cursoIdValido).exchange().expectStatus().isNoContent().expectBody().isEmpty();
 		
 	}
 	
 	@Test
 	void dadoCursoIdinvalido_quadoDeleteCursoPeloId_entaoRespondeComStatusNotFound() {
-		webTestClient.delete().uri("/curso/100").exchange().expectStatus().isNotFound();
+		Long cursoIdInvalido = 100L;
+		webTestClient.delete().uri("/curso/"+cursoIdInvalido).exchange().expectStatus().isNotFound();
 		
 	}
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 }
